@@ -1,3 +1,4 @@
+import DataLoader from 'dataloader';
 import knex from 'knex';
 
 export const db = knex({
@@ -7,3 +8,19 @@ export const db = knex({
   },
   useNullAsDefault: true,
 });
+
+db.on('query', ({sql, bindings}) => {
+  console.log("---START---")
+  console.log('DATA:', sql, bindings)
+  console.log("----END---")
+})
+
+
+
+export const companyLoader = new DataLoader(async (companyIds) => {
+  console.log('[companyLoader] companyIds:', companyIds)
+  const companies = await db.select().from('companies').whereIn('id', companyIds)
+  return companyIds.map((companyId) => {
+    return companies.find((company) => company.id === companyId)
+  })
+})
